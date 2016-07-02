@@ -15,6 +15,33 @@ class RespondersController < ApplicationController
 		render json: { message: 'page not found' }, status: 404
 	end
 
+	def index
+		if params[:show] == "capacity"
+			@capacity = Responder.capacity
+			render :json => { capacity: @capacity }
+		else
+			@responders = Responder.all
+			render :json => { responders: @responders }
+		end
+	end
+
+	def show
+		@responder = Responder.find_by_name(params[:name])
+		if @responder.present?
+			render json: { responder: @responder }
+		else
+			render json: {message: 'responder not found'}, status: 404
+		end
+	end
+
+	def update
+		@responder = Responder.find_by_name(params[:name])
+		if @responder.update_attributes(update_params)
+			render json: { responder: @responder }, status: 201
+		else
+			render json: { message: @responder.errors }, status: 422
+		end
+	end
 
 	def edit
 		render json: { message: 'page not found' }, status: 404
@@ -34,6 +61,8 @@ class RespondersController < ApplicationController
 	def catch_unpermitted_params
 		render :json => { message: $ERROR_INFO.message }.to_json, :status => 422
 	end
-
+	def update_params
+		params.require(:responder).permit(:on_duty)
+	end
 
 end
